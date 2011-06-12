@@ -2,5 +2,13 @@
 
 {% block title %}{{user.screen_name}}{% endblock %}
 {% block contents %}
-	<a href='/logout'>ログアウト</a>
+	<p><a href='/logout'>ログアウト</a></p>
+	<ol>
+		{% for friend in friends %}
+			<div style="border:1px red solid">
+				{{ friend.user.user_id }}→{{ friend.friend.user_id }}({{ friend.friend.screen_name_now }})/ {{ friend.start_date_datetime }} / {{ friend.end_date_datetime }} / {{ friend.unfollow }}
+			</div>
+		{% endfor %}
+	</ol>
 {% endblock %}
+

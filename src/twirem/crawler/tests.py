@@ -4,7 +4,7 @@ from django.test import TestCase
 from twirem.main.models import UserProfile
 #from twirem.main.models import UserFriend
 #from django.core import serializers
-import update
+import db_update
 import time
 from django.db.models import Q
 
@@ -14,7 +14,7 @@ class UpdateTest(TestCase):
 		pass
 
 	def test_users_noactivity(self):
-		users = update.users_noactivity(2)
+		users = db_update.users_noactivity(2)
 
 		# 2 <- 4(activity -4)
 		# 1 <- 2(activity +2)
@@ -23,14 +23,14 @@ class UpdateTest(TestCase):
 		self.assertEquals(users[1].user_id, 1)
 		self.assertEquals(len(users), 2)
 	
-	def test_aa(self):
+	def test_update_screen_names(self):
 		from twirem.main.models import UserScreenName, q_inner
 		names = ([
 			{"id":1, "screen_name":"test1"},
 			{"id":2, "screen_name":"test2"},
 			{"id":3, "screen_name":"test3mod"},
 			])
-		update.update_screen_names(names)
+		db_update.update_screen_names(names)
 
 		inner = q_inner()
 		
@@ -44,7 +44,7 @@ class UpdateTest(TestCase):
 	def test_follower_change_new_user(self):
 		followers = [2,3,5]
 		
-		update.update_followers(
+		db_update.update_followers(
 				user_id = u'6',
 				followers = followers
 				)
@@ -71,7 +71,7 @@ class UpdateTest(TestCase):
 		# new follower is
 		followers = [2,3,5]
 		
-		update.update_followers(
+		db_update.update_followers(
 				user_id = 1,
 				followers = followers
 				)
@@ -103,7 +103,7 @@ class UpdateTest(TestCase):
 		# new friends is
 		friends = [1,2,5]
 		
-		update.update_friends(
+		db_update.update_friends(
 				user_id = 4,
 				friends = friends
 				)

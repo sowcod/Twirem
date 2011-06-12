@@ -42,5 +42,3 @@ class Marge(object):
 			while indexL < lenL:
 				left(self.listL[indexL])
 				indexL += 1
-
-	
