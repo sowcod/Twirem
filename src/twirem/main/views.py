@@ -45,9 +45,13 @@ def toppage(request):
 	ログイン状態であれば個人ページを表示
 	そうでなければトップページを表示
 	"""
+	from twirem.crawler.pagelistingapis import FollowerIds, FollowerUsers
 	try :
-		user = auth_util.get_auth(request)
-		values = {'user' : user}
+		auth = auth_util.get_auth(request)
+		api = auth_util.create_api(auth = auth)
+		ids = FollowerIds(api, user_id = auth.user_id)
+		users = FollowerUsers(api, user_id = auth.user_id)
+		values = {'user' : auth, 'ids' : ids, 'users' : users}
 		return render_to_response(
 				'main/member.html',
 				values,

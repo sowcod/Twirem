@@ -4,7 +4,7 @@ import twoauth
 from . import models
 
 class NotLogonError(Exception):
-	"""
+	u"""
 	ログオンされていない状態を示す
 	"""
 	pass
@@ -12,14 +12,25 @@ class NotLogonError(Exception):
 _ckey = r'Uc3NTwnHkJyO4RagQSbjWg'
 _csecret = r'qFeMN20eKHk6JDqGjgNffuWXvRDhmsjKBJy21Z9lksY'
 
-def create_oauth(token = '', token_secret = ''):
-	return twoauth.oauth(_ckey, _csecret, token, token_secret)
+def create_oauth(atoken = '', asecret = ''):
+	u"""
+	oauthオブジェクトを作る
+	"""
+	return twoauth.oauth(_ckey, _csecret, atoken, asecret)
+
+def create_api(atoken = '', asecret = '', auth = None):
+	u"""
+	APIオブジェクトを作る
+	"""
+	if isinstance(auth, models.Authorization):
+		return twoauth.api(_ckey, _csecret, auth.token, auth.token_secret)
+	else:
+		return twoauth.api(_ckey, _csecret, atoken, asecret)
 
 def save_auth(req_token, oauth_verifier):
 	from models import Authorization
 
 	acc_token = create_oauth().access_token(req_token, oauth_verifier)
-	print(acc_token)
 
 	try:
 		user = Authorization.objects.get(user_id = acc_token['user_id'])

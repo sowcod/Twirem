@@ -7,7 +7,8 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-	url(r'^', include('main.urls'))
+	url(r'^', include('main.urls')),
+	url(r'^command', include('commander.urls')),
     # Examples:
     # url(r'^$', 'twirem.views.home', name='home'),
     # url(r'^twirem/', include('twirem.foo.urls')),
