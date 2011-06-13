@@ -13,7 +13,7 @@ def reset(request):
 
 def friend(request):
 	from twirem.crawler import UserInfoRequester
-	from twirem.crawler.update import update_friends, users_noactivity, update_screen_names
+	from twirem.crawler.db_update import update_friends, users_noactivity, update_screen_names
 	u"""
 	フレンド更新
 	"""

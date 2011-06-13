@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from twirem.main.models import UserProfile, UserScreenName
+from twirem.main.models import UserProfile, UserFriend, UserScreenName, q_inner
 from twirem.arrayutil import Marge
 
 def users_noactivity(user_id):
@@ -9,8 +9,8 @@ def users_noactivity(user_id):
 	activityの低い順にユーザIDを返す。
 	"""
 	user = UserProfile.objects.get(user_id = user_id)
-	friends = [friend.friend for friend in user.friends_now.order_by('friend__user_id')]
-	followers = [friend.user for friend in user.followers_now.order_by('user__user_id')]
+	friends = [friend.friend for friend in user.friends_now.order_by('friend')]
+	followers = [friend.user for friend in user.followers_now.order_by('user')]
 
 	users = []
 	m = Marge(friends, followers, 
@@ -31,7 +31,7 @@ def update_followers(user_id, followers):
 	new_followers = followers[:]
 	new_followers.sort()
 	user = UserProfile.get_or_create(user_id = user_id)
-	db_followers = user.followers_now.order_by('user__user_id')
+	db_followers = user.followers_now.order_by('user')
 
 	def removed(o):
 		friend_rem = user.followers.create(user = o.user, unfollow = True)
@@ -47,7 +47,7 @@ def update_followers(user_id, followers):
 		o.save()
 
 	m = Marge(db_followers, new_followers,
-			comp_func = lambda l, r: cmp(l.user.user_id, r))
+			comp_func = lambda l, r: cmp(l.user.pk, r))
 	m.full(match = refollowed, left = removed, right = followed)
 
 def update_friends(user_id, friends):
@@ -58,7 +58,7 @@ def update_friends(user_id, friends):
 	new_friends = friends[:]
 	new_friends.sort()
 	user = UserProfile.get_or_create(user_id = user_id)
-	db_friends = user.friends_now.order_by('friend__user_id')
+	db_friends = user.friends_now.order_by('friend')
 
 	def removed(o):
 		friend_rem = user.friends.create(friend = o.friend, unfollow = True)
@@ -77,7 +77,7 @@ def update_friends(user_id, friends):
 		pass
 
 	m = Marge(db_friends, new_friends,
-			comp_func = lambda l, r: cmp(l.friend.user_id, r))
+			comp_func = lambda l, r: cmp(l.friend.pk, r))
 	m.full(match = refollowed, left = removed, right = followed)
 
 def update_screen_names(users):
@@ -99,7 +99,7 @@ def update_screen_names(users):
 		if user_screen_name is None or user_screen_name.screen_name != screen_name:
 			user_screen_name_new = user.screen_names.create(screen_name = screen_name)
 			if user_screen_name is not None :
-				# screen_nameの変更の時
+				# screen_nameの変更された時
 				user_screen_name.end_date = user_screen_name_new.start_date
 				user_screen_name.save()
 
