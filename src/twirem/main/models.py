@@ -25,8 +25,20 @@ class Authorization(models.Model):
 	token_secret = models.CharField(max_length = 100, blank = True)
 
 class UserProfile(models.Model):
+	"""
+	next_update_date : 次回このユーザ回りの更新をする日時
+	"""
 	user_id = models.IntegerField(primary_key = True, db_index = True)
 	activity = models.IntegerField(default = 0)
+	authorization = models.OneToOneField('Authorization', related_name = 'user_profile', null = True)
+	next_update_date = models.FloatField(default = 0)
+
+	def __init__(self, *args, **kwargs):
+		super(UserProfile, self).__init__(*args, **kwargs)
+		self.friends_activity = UserFriendsActivity()
+		self.followers_activity = UserFollowersActivity()
+		self.bio_activity = UserBioActivity()
+		self.save()
 
 	@classmethod
 	def get_or_create(cls, user_id, **args):
@@ -51,6 +63,32 @@ class UserProfile(models.Model):
 	def followers_now(self):
 		return self.followers.filter(q_inner())
 
+class UserFriendsActivity(models.Model):
+	"""
+	フレンドの更新がされたかどうか
+	"""
+	user = models.OneToOneField('UserProfile', related_name = 'friends_activity')
+	update_date = models.FloatField(default = 0)
+
+class UserFollowersActivity(models.Model):
+	"""
+	フォロワーの更新がされたかどうか
+	"""
+	user = models.OneToOneField('UserProfile', related_name = 'followers_activity')
+	update_date = models.FloatField(default = 0)
+
+class UserBioActivity(models.Model):
+	"""
+	Bioの更新がされたかどうか
+	"""
+	user = models.OneToOneField('UserProfile', related_name = 'bio_activity')
+	update_date = models.FloatField(default = 0)
+
+class UserBio(models.Model):
+	user = models.OneToOneField('UserProfile', related_name = 'latest_bio')
+	screen_name = models.CharField(max_length = 20)
+	icon_url = models.CharField(max_length = 500)
+	expiration_date = models.FloatField(default = 0)
 
 class SpanModel(models.Model):
 	start_date = models.FloatField(default = -1)

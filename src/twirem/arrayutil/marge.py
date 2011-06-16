@@ -18,27 +18,36 @@ class Marge(object):
 		leftのみ:  left(lo)
 		rightのみ: right(ro)
 		"""
-		indexL = 0
-		indexR = 0
-		lenL = len(self.listL)
-		lenR = len(self.listR)
-		while indexL < lenL and indexR < lenR:
-			lo = self.listL[indexL]
-			ro = self.listR[indexR]
+		iterL = iter(self.listL)
+		iterR = iter(self.listR)
+		endL = False
+		endR = False
+
+		def nextL():
+			try: return iterL.next(), False
+			except StopIteration: return None, True
+		def nextR():
+			try: return iterR.next(), False
+			except StopIteration: return None, True
+
+		(lo, endL) = nextL()
+		(ro, endR) = nextR()
+
+		while endL == False and endR == False:
 			if self.compf(lo,ro) == 0 :
 				match(lo, ro)
-				indexL += 1
-				indexR += 1
+				(lo, endL) = nextL()
+				(ro, endR) = nextR()
 			elif self.compf(lo, ro) < 0 :
 				left(lo)
-				indexL += 1
+				(lo, endL) = nextL()
 			else:
 				right(ro)
-				indexR += 1
+				(ro, endR) = nextR()
 		else:
-			while indexR < lenR:
-				right(self.listR[indexR])
-				indexR += 1
-			while indexL < lenL:
-				left(self.listL[indexL])
-				indexL += 1
+			while endR == False:
+				right(ro)
+				(ro, endR) = nextR()
+			while endL == False:
+				left(lo)
+				(lo, endL) = nextL()

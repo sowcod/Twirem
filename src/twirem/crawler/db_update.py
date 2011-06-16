@@ -1,7 +1,19 @@
 #-*- coding: utf-8 -*-
 
-from twirem.main.models import UserProfile, UserFriend, UserScreenName, q_inner
+from twirem.main.models import UserProfile, UserScreenName
 from twirem.arrayutil import Marge
+
+class IteratorProxy(object):
+	def __init__(self, iteratableList, vfunc):
+		self.iteratableList = iteratableList
+		self.vfunc = vfunc
+	def __iter__(self):
+		for o in self.iteratableList: 
+			yield self.vfunc(o)
+	def __getitem__(self, index):
+		return self.vfunc(self.iteratableList[index])
+	def __len__(self):
+		return self.iteratableList.__len__()
 
 def users_noactivity(user_id):
 	u"""
@@ -9,8 +21,8 @@ def users_noactivity(user_id):
 	activityの低い順にユーザIDを返す。
 	"""
 	user = UserProfile.objects.get(user_id = user_id)
-	friends = [friend.friend for friend in user.friends_now.order_by('friend')]
-	followers = [friend.user for friend in user.followers_now.order_by('user')]
+	friends = IteratorProxy(user.friends_now.order_by('friend'), lambda o: o.friend)
+	followers = IteratorProxy(user.followers_now.order_by('user'), lambda o: o.user)
 
 	users = []
 	m = Marge(friends, followers, 
