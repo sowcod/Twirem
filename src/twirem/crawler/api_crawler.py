@@ -2,15 +2,18 @@
 
 from twirem.main.models import UserProfile
 from twirem.main import auth_util
-from twirem.crawler import UserInfoRequester
+from twirem.crawler.user_info_requester import UserInfoRequester
 from twirem.crawler import db_update
+from twirem.arrayutil import IteratorProxy, CrusterList
+import logging
 import time
 
-class Crawler(object):
+class ApiCrawler(object):
 	def __init__(self, sleep = 5):
 		self.sleep = sleep
 
 	def run(self):
+		logging.debug('start crawling')
 		while True:
 			self.crawl_users(limit = 1)
 			time.sleep(self.sleep)
@@ -21,8 +24,8 @@ class Crawler(object):
 		"""
 		users = UserProfile.objects.filter(
 				authorization__isnull = False,
-				next_update_date__lt = time.time()
-				).order_by('-next_update_date')[:limit]
+				update_date__lt = time.time() - 60
+				).order_by('update_date')[:limit]
 
 		for user in users:
 			self.crawl_user(user)
@@ -39,34 +42,55 @@ class Crawler(object):
 		self.update_friends(user, requester)
 		self.update_bios(user, requester)
 
-		users = [str(user.user_id) for user 
-				in users_noactivity(auth.user_id) if user.activity == 0]
-		update_users = sorted(requester.lookup(users),
-				cmp = lambda a,b:cmp(a['id'], b['id']))
+		user.update_date = time.time()
+		user.save()
+		user.followers_activity.update_date = 0
+		user.friends_activity.update_date = 0
+		user.bios_activity.update_date = 0
+
+		user.followers_activity.save()
+		user.friends_activity.save()
+		user.bios_activity.save()
 
 	def update_followers(self, user, requester):
+		"""
+		ユーザのフォロワー状況を更新
+		"""
 		activity = user.followers_activity
-		if activity != 0 : return
+		if activity.update_date != 0 : return
 
-		new_followers = requester.request_followers_ids(user.user_id)
+		new_followers = requester.request_follower_ids(user.user_id)
 		db_update.update_followers(user.user_id, new_followers)
 
-		activity = user.followers_activity
 		activity.update_date = time.time()
 		activity.save()
 
 	def update_friends(self, user, requester):
+		"""
+		ユーザのフレンド状況を更新
+		"""
 		activity = user.friends_activity
-		if activity != 0 : return
+		if activity.update_date != 0 : return
 
 		new_friends = requester.request_friend_ids(user.user_id)
 		db_update.update_friends(user.user_id, new_friends)
 
-		activity = user.followers_activity
 		activity.update_date = time.time()
 		activity.save()
 	
 	def update_bios(self, user, requester):
-		pass
+		"""
+		ユーザに関連するユーザのBioを更新
+		"""
+		activity = user.bios_activity
+		if activity.update_date != 0 : return
 
+		target_users = db_update.users_related(user.user_id)
+		users_list = CrusterList(target_users, 100)
+		for users in users_list:
+			bios = requester.lookup(IteratorProxy(users, lambda o: str(o.user_id)))
+			db_update.update_bios(bios, time.time() - 60)
+
+		activity.update_date = time.time()
+		activity.save()
 

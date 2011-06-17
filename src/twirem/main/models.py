@@ -23,22 +23,29 @@ class Authorization(models.Model):
 	screen_name = models.CharField(max_length = 20)
 	token = models.CharField(max_length = 100, blank = True)
 	token_secret = models.CharField(max_length = 100, blank = True)
+	def __init__(self, *args, **kwargs):
+		super(Authorization, self).__init__(*args, **kwargs)
+		self.user_profile = UserProfile.objects.get_or_create(
+				user_id = self.user_id,
+				authorization = self)[0]
 
 class UserProfile(models.Model):
 	"""
 	next_update_date : 次回このユーザ回りの更新をする日時
 	"""
 	user_id = models.IntegerField(primary_key = True, db_index = True)
-	activity = models.IntegerField(default = 0)
+	#activity = models.IntegerField(default = 0)
 	authorization = models.OneToOneField('Authorization', related_name = 'user_profile', null = True)
-	next_update_date = models.FloatField(default = 0)
+	update_date = models.FloatField(default = 0)
 
 	def __init__(self, *args, **kwargs):
 		super(UserProfile, self).__init__(*args, **kwargs)
-		self.friends_activity = UserFriendsActivity()
-		self.followers_activity = UserFollowersActivity()
-		self.bio_activity = UserBioActivity()
-		self.save()
+		self.friends_activity = UserFriendsActivity.objects.get_or_create(
+				user = self)[0]
+		self.followers_activity = UserFollowersActivity.objects.get_or_create(
+				user = self)[0]
+		self.bios_activity = UserBiosActivity.objects.get_or_create(
+				user = self)[0]
 
 	@classmethod
 	def get_or_create(cls, user_id, **args):
@@ -77,18 +84,18 @@ class UserFollowersActivity(models.Model):
 	user = models.OneToOneField('UserProfile', related_name = 'followers_activity')
 	update_date = models.FloatField(default = 0)
 
-class UserBioActivity(models.Model):
+class UserBiosActivity(models.Model):
 	"""
 	Bioの更新がされたかどうか
 	"""
-	user = models.OneToOneField('UserProfile', related_name = 'bio_activity')
+	user = models.OneToOneField('UserProfile', related_name = 'bios_activity')
 	update_date = models.FloatField(default = 0)
 
 class UserBio(models.Model):
 	user = models.OneToOneField('UserProfile', related_name = 'latest_bio')
 	screen_name = models.CharField(max_length = 20)
 	icon_url = models.CharField(max_length = 500)
-	expiration_date = models.FloatField(default = 0)
+	update_date = models.FloatField(default = 0)
 
 class SpanModel(models.Model):
 	start_date = models.FloatField(default = -1)

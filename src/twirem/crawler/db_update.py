@@ -1,28 +1,27 @@
 #-*- coding: utf-8 -*-
 
-from twirem.main.models import UserProfile, UserScreenName
-from twirem.arrayutil import Marge
+from twirem.main.models import UserProfile, UserScreenName, UserBio
+from twirem.arrayutil import Marge, IteratorProxy
+import time
 
-class IteratorProxy(object):
-	def __init__(self, iteratableList, vfunc):
-		self.iteratableList = iteratableList
-		self.vfunc = vfunc
-	def __iter__(self):
-		for o in self.iteratableList: 
-			yield self.vfunc(o)
-	def __getitem__(self, index):
-		return self.vfunc(self.iteratableList[index])
-	def __len__(self):
-		return self.iteratableList.__len__()
-
-def users_noactivity(user_id):
+def users_related(user_id, contains_unfollow = False):
 	u"""
-	user_id の自分自身・フレンド・フォロワーのうち、
-	activityの低い順にユーザIDを返す。
+	user_id の自分自身・フレンド・フォロワーの
+	UserProfileを返す。
+	contains_unfollowがTrueの時、
+		過去にフレンド/フォロワーだったものも対象にする。
 	"""
 	user = UserProfile.objects.get(user_id = user_id)
-	friends = IteratorProxy(user.friends_now.order_by('friend'), lambda o: o.friend)
-	followers = IteratorProxy(user.followers_now.order_by('user'), lambda o: o.user)
+	friend_friends   = user.friends_now.order_by('friend')
+	friend_followers = user.followers_now.order_by('user')
+
+	if not contains_unfollow:
+		# unfolowを除外
+		friend_friends   = friend_friends.exclude(unfollow = True)
+		friend_followers = friend_followers.exclude(unfollow = True)
+
+	friends   = IteratorProxy(friend_friends, lambda o: o.friend)
+	followers = IteratorProxy(friend_followers, lambda o: o.user)
 
 	users = []
 	m = Marge(friends, followers, 
@@ -30,8 +29,6 @@ def users_noactivity(user_id):
 	m.full(match = lambda l, r: users.append(l),
 			left = lambda o: users.append(o),
 			right = lambda o: users.append(o))
-
-	users.sort(cmp = lambda a, b: cmp(a.activity, b.activity))
 
 	return users
 
@@ -91,6 +88,22 @@ def update_friends(user_id, friends):
 	m = Marge(db_friends, new_friends,
 			comp_func = lambda l, r: cmp(l.friend.pk, r))
 	m.full(match = refollowed, left = removed, right = followed)
+
+def update_bios(bios, target_date = None):
+	u"""
+	APIから得られたユーザ情報のリストから、
+	UserBioテーブルを更新する。
+	"""
+	if target_date is None: target_date = time.time() - 60*60*24
+
+	for bio_data in bios:
+		user = UserProfile.objects.get_or_create(user_id = bio_data['id'])[0]
+		bio = UserBio.objects.get_or_create(user = user)[0]
+		if bio.update_date <= target_date:
+			bio.screen_name = bio_data['screen_name']
+			bio.icon_url = bio_data['profile_image_url']
+			bio.update_date = time.time()
+			bio.save()
 
 def update_screen_names(users):
 	u"""

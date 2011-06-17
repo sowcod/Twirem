@@ -13,15 +13,52 @@ class UpdateTest(TestCase):
 	def setup(self):
 		pass
 
-	def test_users_noactivity(self):
-		users = db_update.users_noactivity(2)
+	def test_users_related_all(self):
+		users = db_update.users_related(2, contains_unfollow = True)
 
-		# 2 <- 4(activity -4)
-		# 1 <- 2(activity +2)
+		# 2 <- 4(unfollow)
+		# 1 <- 2
 
-		self.assertEquals(users[0].user_id, 4)
-		self.assertEquals(users[1].user_id, 1)
+		users.sort(cmp = lambda a,b: cmp(a.user_id, b.user_id))
 		self.assertEquals(len(users), 2)
+		self.assertEquals(users[0].user_id, 1)
+		self.assertEquals(users[1].user_id, 4)
+
+	def test_users_related(self):
+		users = db_update.users_related(2) # unfollowは対象外
+
+		# 2 <- 4(unfollow)
+		# 1 <- 2
+
+		users.sort(cmp = lambda a,b: cmp(a.user_id, b.user_id))
+		self.assertEquals(len(users), 1)
+		self.assertEquals(users[0].user_id, 1)
+
+	def test_update_bios(self):
+		bios = ([
+			{"id":1, "screen_name":"test1", "profile_image_url":"url1"},
+			{"id":2, "screen_name":"test2", "profile_image_url":"url2"},
+			{"id":3, "screen_name":"test3", "profile_image_url":"url3"},
+			{"id":9, "screen_name":"test9", "profile_image_url":"url9"},
+			])
+		db_update.update_bios(bios)
+
+		self.assertEquals(
+				UserProfile.objects.get(pk = 1).latest_bio.screen_name, 'test1')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 1).latest_bio.icon_url, 'url1')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 2).latest_bio.screen_name, 'test2')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 2).latest_bio.icon_url, 'url2')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 3).latest_bio.screen_name, 'test3')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 3).latest_bio.icon_url, 'url3')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 9).latest_bio.screen_name, 'test9')
+		self.assertEquals(
+				UserProfile.objects.get(pk = 9).latest_bio.icon_url, 'url9')
 	
 	def test_update_screen_names(self):
 		from twirem.main.models import UserScreenName, q_inner

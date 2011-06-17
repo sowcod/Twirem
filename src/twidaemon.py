@@ -7,9 +7,9 @@ import os
 import sys
 #import signal
 
-import time
 import logging
 import logging.config
+from twirem.crawler import ApiCrawler
 
 has_children = {}
 PID_FILE='daemon.pid'
@@ -19,15 +19,15 @@ logger = logging.getLogger('daemon')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'twirem.settings'
 
 def main():
-	daemonize()
+	#daemonize()
 
-	write_pid()
+	#write_pid()
 
 	#signal.signal(signal.SIGTERM, kill_all_children)
 
-	while True:
-		logger.debug('aaa')
-		time.sleep(1)
+	api_crawler = ApiCrawler(5)
+
+	api_crawler.run()
 
 def write_pid():
 	with open(PID_FILE, 'w') as f:
