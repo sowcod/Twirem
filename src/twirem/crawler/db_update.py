@@ -11,7 +11,7 @@ def users_related(user_id, contains_unfollow = False):
 	contains_unfollowがTrueの時、
 		過去にフレンド/フォロワーだったものも対象にする。
 	"""
-	user = UserProfile.objects.get(user_id = user_id)
+	user = UserProfile.objects.get_or_create(user_id = user_id)[0]
 	friend_friends   = user.friends_now.order_by('friend')
 	friend_followers = user.followers_now.order_by('user')
 
@@ -39,7 +39,7 @@ def update_followers(user_id, followers):
 	"""
 	new_followers = followers[:]
 	new_followers.sort()
-	user = UserProfile.get_or_create(user_id = user_id)
+	user = UserProfile.objects.get_or_create(user_id = user_id)[0]
 	db_followers = user.followers_now.order_by('user')
 
 	def removed(o):
@@ -47,7 +47,8 @@ def update_followers(user_id, followers):
 		o.end_date = friend_rem.start_date
 		o.save()
 	def followed(uid):
-		user.followers.create(user = UserProfile.get_or_create(user_id = uid))
+		user.followers.create(
+				user = UserProfile.objects.get_or_create(user_id = uid)[0])
 	def refollowed(o, uid):
 		if not o.unfollow : return
 		# refollow
@@ -66,7 +67,7 @@ def update_friends(user_id, friends):
 	"""
 	new_friends = friends[:]
 	new_friends.sort()
-	user = UserProfile.get_or_create(user_id = user_id)
+	user = UserProfile.objects.get_or_create(user_id = user_id)[0]
 	db_friends = user.friends_now.order_by('friend')
 
 	def removed(o):
@@ -75,7 +76,8 @@ def update_friends(user_id, friends):
 		o.save()
 		pass
 	def followed(uid):
-		user.friends.create(friend = UserProfile.get_or_create(user_id = uid))
+		user.friends.create(
+				friend = UserProfile.objects.get_or_create(user_id = uid)[0])
 		pass
 	def refollowed(o, uid):
 		if not o.unfollow : return
@@ -114,7 +116,7 @@ def update_screen_names(users):
 	for user_data in users:
 		user_id = user_data['id']
 		screen_name = user_data['screen_name']
-		user = UserProfile.get_or_create(user_id = user_id)
+		user = UserProfile.objects.get_or_create(user_id = user_id)[0]
 		
 		user_screen_name = None
 		try:

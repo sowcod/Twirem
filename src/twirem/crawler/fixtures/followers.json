@@ -3,40 +3,35 @@
 		"model":"main.UserProfile",
 		"pk":null,
 		"fields":{
-			"user_id":1,
-			"activity":0
+			"user_id":1
 		}
 	},
 	{
 		"model":"main.UserProfile",
 		"pk":null,
 		"fields":{
-			"user_id":2,
-			"activity":2
+			"user_id":2
 		}
 	},
 	{
 		"model":"main.UserProfile",
 		"pk":null,
 		"fields":{
-			"user_id":3,
-			"activity":3
+			"user_id":3
 		}
 	},
 	{
 		"model":"main.UserProfile",
 		"pk":null,
 		"fields":{
-			"user_id":4,
-			"activity":-4
+			"user_id":4
 		}
 	},
 	{
 		"model":"main.UserProfile",
 		"pk":null,
 		"fields":{
-			"user_id":5,
-			"activity":5
+			"user_id":5
 		}
 	},
 	{

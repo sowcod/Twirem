@@ -11,13 +11,6 @@ def q_inner(tick = None):
 	if tick is None: tick = time.time()
 	return Q(start_date__lte = tick, end_date__gt = tick)
 
-def get_or_create(model, **args):
-	try:
-		obj = models.objects.get(**args)
-	except model.DoesNotExist:
-		obj = model(**args)
-	return obj
-
 class Authorization(models.Model):
 	user_id = models.IntegerField(primary_key = True)
 	screen_name = models.CharField(max_length = 20)
@@ -34,7 +27,6 @@ class UserProfile(models.Model):
 	next_update_date : 次回このユーザ回りの更新をする日時
 	"""
 	user_id = models.IntegerField(primary_key = True, db_index = True)
-	#activity = models.IntegerField(default = 0)
 	authorization = models.OneToOneField('Authorization', related_name = 'user_profile', null = True)
 	update_date = models.FloatField(default = 0)
 
@@ -47,16 +39,6 @@ class UserProfile(models.Model):
 		self.bios_activity = UserBiosActivity.objects.get_or_create(
 				user = self)[0]
 
-	@classmethod
-	def get_or_create(cls, user_id, **args):
-		try:
-			user = cls.objects.get(user_id = user_id)
-			return user
-		except UserProfile.DoesNotExist:
-			user = cls(user_id = user_id, **args)
-			user.save()
-			return user
-	
 	@property
 	def screen_name_now(self):
 		return self.screen_names.get(q_inner()).screen_name
