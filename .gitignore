@@ -3,4 +3,6 @@
 *.db
 *.pid
 *.log
+icons/*
+!icons/empty
 /startdev.sh

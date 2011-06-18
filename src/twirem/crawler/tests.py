@@ -2,6 +2,7 @@
 
 from django.test import TestCase
 from twirem.main.models import UserProfile
+import db_crawler
 #from twirem.main.models import UserFriend
 #from django.core import serializers
 import db_update
@@ -20,9 +21,10 @@ class UpdateTest(TestCase):
 		# 1 <- 2
 
 		users.sort(cmp = lambda a,b: cmp(a.user_id, b.user_id))
-		self.assertEquals(len(users), 2)
+		self.assertEquals(len(users), 3)
 		self.assertEquals(users[0].user_id, 1)
-		self.assertEquals(users[1].user_id, 4)
+		self.assertEquals(users[1].user_id, 2)
+		self.assertEquals(users[2].user_id, 4)
 
 	def test_users_related(self):
 		users = db_update.users_related(2) # unfollowは対象外
@@ -31,8 +33,24 @@ class UpdateTest(TestCase):
 		# 1 <- 2
 
 		users.sort(cmp = lambda a,b: cmp(a.user_id, b.user_id))
-		self.assertEquals(len(users), 1)
+		self.assertEquals(len(users), 2)
 		self.assertEquals(users[0].user_id, 1)
+		self.assertEquals(users[1].user_id, 2)
+	
+	def test_convert_iconufl(self):
+		iconurl = r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal.JPG'
+		original, bigger, normal, mini = db_crawler.DatabaseCrawler.convert_iconurl(iconurl)
+		self.assertEquals(original, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619.JPG')
+		self.assertEquals(bigger, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_bigger.JPG')
+		self.assertEquals(normal, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal.JPG')
+		self.assertEquals(mini, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_mini.JPG')
+
+		iconurl2 = r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal'
+		original, bigger, normal, mini = db_crawler.DatabaseCrawler.convert_iconurl(iconurl2)
+		self.assertEquals(original, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619')
+		self.assertEquals(bigger, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_bigger')
+		self.assertEquals(normal, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal')
+		self.assertEquals(mini, r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_mini')
 
 	def test_update_bios(self):
 		bios = ([

@@ -4,6 +4,8 @@ from twirem.main.models import UserProfile, UserScreenName, UserBio
 from twirem.arrayutil import Marge, IteratorProxy
 import time
 
+#TODO: in_bulk関数を使って最適化出来ないか？
+
 def users_related(user_id, contains_unfollow = False):
 	u"""
 	user_id の自分自身・フレンド・フォロワーの
@@ -23,7 +25,7 @@ def users_related(user_id, contains_unfollow = False):
 	friends   = IteratorProxy(friend_friends, lambda o: o.friend)
 	followers = IteratorProxy(friend_followers, lambda o: o.user)
 
-	users = []
+	users = [user]
 	m = Marge(friends, followers, 
 			comp_func = lambda l,r: cmp(l.user_id, r.user_id))
 	m.full(match = lambda l, r: users.append(l),
@@ -74,18 +76,15 @@ def update_friends(user_id, friends):
 		friend_rem = user.friends.create(friend = o.friend, unfollow = True)
 		o.end_date = friend_rem.start_date
 		o.save()
-		pass
 	def followed(uid):
 		user.friends.create(
 				friend = UserProfile.objects.get_or_create(user_id = uid)[0])
-		pass
 	def refollowed(o, uid):
 		if not o.unfollow : return
 		#refollow
 		friend_rem = user.friends.create(friend = o.friend)
 		o.end_date = friend_rem.start_date
 		o.save()
-		pass
 
 	m = Marge(db_friends, new_friends,
 			comp_func = lambda l, r: cmp(l.friend.pk, r))

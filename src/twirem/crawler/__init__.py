@@ -4,6 +4,7 @@ import pagelistingapis
 import user_info_requester
 import db_update
 import api_crawler
+import db_crawler
 
 FollowerIds = pagelistingapis.FollowerIds
 FollowerUsers = pagelistingapis.FollowerUsers
@@ -17,3 +18,4 @@ update_friends = db_update.update_friends
 update_screen_names = db_update.update_screen_names
 
 ApiCrawler = api_crawler.ApiCrawler
+DatabaseCrawler = db_crawler.DatabaseCrawler

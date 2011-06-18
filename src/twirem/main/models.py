@@ -7,9 +7,13 @@ from django.db.models import Q
 
 _maxtime = time.mktime(datetime.max.timetuple())
 
-def q_inner(tick = None):
+def q_inner(tick = None, key = ''):
 	if tick is None: tick = time.time()
-	return Q(start_date__lte = tick, end_date__gt = tick)
+	if key != '' : key += '__'
+	kargs = {}
+	kargs[key + 'start_date__lte'] = tick
+	kargs[key + 'end_date__gt'] = tick
+	return Q(**kargs)
 
 class Authorization(models.Model):
 	user_id = models.IntegerField(primary_key = True)
@@ -42,6 +46,9 @@ class UserProfile(models.Model):
 	@property
 	def screen_name_now(self):
 		return self.screen_names.get(q_inner()).screen_name
+	@property
+	def icons_now(self):
+		return self.icons.get(q_inner())
 	@property
 	def screen_names_now(self):
 		return self.screen_names.get(q_inner())
@@ -112,7 +119,19 @@ class UserScreenName(SpanModel):
 	screen_name = models.CharField(max_length = 20)
 
 class UserIcon(SpanModel):
+	"""
+	small(), normal(), bigger(), original()関数で、
+	画像のファイルパスを取得できる。
+	"""
 	user = models.ForeignKey('UserProfile',
 			related_name = 'icons', db_index = True)
 	url = models.CharField(max_length = 500)
 	digest = models.CharField(max_length = 40)
+	def small(self):
+		pass
+	def normal(self):
+		pass
+	def bigger(self):
+		pass
+	def original(self):
+		pass

@@ -5,11 +5,12 @@ http://d.hatena.ne.jp/yoshifumi1975/20090516/p1
 """
 import os
 import sys
+import time
 #import signal
 
 import logging
 import logging.config
-from twirem.crawler import ApiCrawler
+from twirem.crawler import ApiCrawler, DatabaseCrawler
 
 has_children = {}
 PID_FILE='daemon.pid'
@@ -25,9 +26,13 @@ def main():
 
 	#signal.signal(signal.SIGTERM, kill_all_children)
 
-	api_crawler = ApiCrawler(5)
+	api_crawler = ApiCrawler(60)
+	db_crawler = DatabaseCrawler(30)
 
-	api_crawler.run()
+	api_crawler.start()
+	db_crawler.start()
+	while True:
+		time.sleep(10)
 
 def write_pid():
 	with open(PID_FILE, 'w') as f:

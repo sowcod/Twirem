@@ -7,15 +7,18 @@ from twirem.crawler import db_update
 from twirem.arrayutil import IteratorProxy, CrusterList
 import logging
 import time
+import threading
 
-class ApiCrawler(object):
+class ApiCrawler(threading.Thread):
 	def __init__(self, sleep = 5):
+		super(ApiCrawler, self).__init__(target = self)
 		self.sleep = sleep
+		self.setDaemon(True)
 
 	def run(self):
-		logging.debug('start crawling')
+		logging.debug('start crawling api')
 		while True:
-			self.crawl_users(limit = 1)
+			self.crawl_users(limit = 10)
 			time.sleep(self.sleep)
 	
 	def crawl_users(self, limit = 1):
@@ -26,6 +29,7 @@ class ApiCrawler(object):
 				authorization__isnull = False,
 				update_date__lt = time.time() - 60
 				).order_by('update_date')[:limit]
+		logging.debug('ApiCrawler time : %d' % (time.time() - 60))
 
 		for user in users:
 			self.crawl_user(user)
