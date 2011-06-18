@@ -2,12 +2,9 @@
 
 from twirem.main.models import UserProfile, UserBio
 from twirem.main.models import UserScreenName, UserIcon
-import urllib
-from PIL import Image
+from iconmanager import ManagedIcon
 import logging
 import time
-import re
-import hashlib
 import threading
 
 class DatabaseCrawler(threading.Thread):
@@ -52,25 +49,6 @@ class DatabaseCrawler(threading.Thread):
 			if old_sn is not None:
 				old_sn.end_date = new_sn.start_date
 				old_sn.save()
-	
-	@classmethod
-	def convert_iconurl(self, url):
-		"""
-		http://~~~/~~~_normal.xxx
-		を、
-		http://~~~/~~~.xxx
-		http://~~~/~~~_bigger.xxx
-		http://~~~/~~~_normal.xxx
-		http://~~~/~~~_mini.xxx
-		に変換
-		"""
-		m = re.match(r'^(.*)_normal(\.\w*)?$', url)
-		pre = m.group(1)
-		suf = m.group(2) if m.group(2) is not None else ''
-
-		newurl = lambda n: pre + n + suf
-
-		return newurl(''), newurl('_bigger'), newurl('_normal'), newurl('_mini')
 
 	def update_icon(self, bio, user):
 		"""
@@ -81,19 +59,14 @@ class DatabaseCrawler(threading.Thread):
 		except UserIcon.DoesNotExist:
 			old_icon = None
 
-		#TODO: アイコン画像を取得してdigestを計算する
-		urls = DatabaseCrawler.convert_iconurl(bio.icon_url)
-		buf = urllib.urlopen(urls[0]).read()
-		new_digest = hashlib.sha1(buf).hexdigest()
-		with open('/Users/sohei/Documents/Projects/Twirem/icons/%s' % new_digest, 'w') as f:
-			f.write(buf)
+		# normalアイコン画像を取得してdigestを計算する
+		icon = ManagedIcon(bio.icon_url)
 
 		if old_icon is None \
-				or old_icon.url != urls[0] \
-				or old_icon.digest != new_digest:
-			new_icon = user.icons.create(digest = new_digest, url = urls[0])
+				or old_icon.url != icon.urls['normal'] \
+				or old_icon.digest != icon.digest:
+			new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'])
+			icon.load_all()
 			if old_icon is not None:
-				print(urls[0], old_icon.url)
-				print(new_digest, old_icon.digest)
 				old_icon.end_date = new_icon.start_date
 				old_icon.save()

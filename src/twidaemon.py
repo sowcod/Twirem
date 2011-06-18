@@ -11,6 +11,7 @@ import time
 import logging
 import logging.config
 from twirem.crawler import ApiCrawler, DatabaseCrawler
+from twirem.crawler import iconmanager
 
 has_children = {}
 PID_FILE='daemon.pid'
@@ -18,6 +19,7 @@ PID_FILE='daemon.pid'
 logging.config.fileConfig('log.conf')
 logger = logging.getLogger('daemon')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'twirem.settings'
+iconmanager.set_base_path('../icons')
 
 def main():
 	#daemonize()
