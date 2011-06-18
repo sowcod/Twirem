@@ -40,14 +40,14 @@ class UpdateTest(TestCase):
 	def test_convert_iconufl(self):
 		iconurl = r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal.JPG'
 		urls = iconmanager.convert_iconurl(iconurl)
-		self.assertEquals(urls['original'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619.JPG')
+		self.assertEquals(urls['full'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619.JPG')
 		self.assertEquals(urls['bigger'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_bigger.JPG')
 		self.assertEquals(urls['normal'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal.JPG')
 		self.assertEquals(urls['mini'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_mini.JPG')
 
 		iconurl2 = r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal'
 		urls = iconmanager.convert_iconurl(iconurl2)
-		self.assertEquals(urls['original'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619')
+		self.assertEquals(urls['full'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619')
 		self.assertEquals(urls['bigger'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_bigger')
 		self.assertEquals(urls['normal'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_normal')
 		self.assertEquals(urls['mini'], r'http://a3.twimg.com/profile_images/1133125829/IMG_0619_mini')

@@ -38,7 +38,7 @@ def convert_iconurl(url):
 	newurl = lambda n: pre + n + suf
 
 	return {
-			'original': newurl(''),
+			'full': newurl(''),
 			'bigger': newurl('_bigger'),
 			'normal': newurl('_normal'),
 			'mini' : newurl('_mini'),
@@ -53,7 +53,7 @@ def icon_digest_dir(digest):
 def icon_paths(digest):
 	digest_dir = icon_digest_dir(digest)
 	return {
-			'original': os.path.join(digest_dir, 'original'),
+			'full': os.path.join(digest_dir, 'full'),
 			'bigger': os.path.join(digest_dir, 'bigger'),
 			'normal': os.path.join(digest_dir, 'normal'),
 			'mini': os.path.join(digest_dir, 'mini'),
@@ -75,7 +75,7 @@ class ManagedIcon(object):
 		self.load('bigger')
 		self.load('mini')
 		try:
-			self.load('original')
+			self.load('full')
 		except urllib2.HTTPError:
 			pass
 

@@ -4,5 +4,5 @@
 *.pid
 *.log
 icons/*
-!icons/empty
+!icons/z_empty
 /startdev.sh
