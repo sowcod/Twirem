@@ -5,6 +5,7 @@ import user_info_requester
 import db_update
 import api_crawler
 import db_crawler
+import iconmanager
 
 FollowerIds = pagelistingapis.FollowerIds
 FollowerUsers = pagelistingapis.FollowerUsers
@@ -19,3 +20,5 @@ update_screen_names = db_update.update_screen_names
 
 ApiCrawler = api_crawler.ApiCrawler
 DatabaseCrawler = db_crawler.DatabaseCrawler
+
+ManagedIcon = iconmanager.ManagedIcon

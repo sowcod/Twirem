@@ -65,8 +65,8 @@ class DatabaseCrawler(threading.Thread):
 		if old_icon is None \
 				or old_icon.url != icon.urls['normal'] \
 				or old_icon.digest != icon.digest:
-			new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'])
 			icon.load_all()
+			new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'])
 			if old_icon is not None:
 				old_icon.end_date = new_icon.start_date
 				old_icon.save()

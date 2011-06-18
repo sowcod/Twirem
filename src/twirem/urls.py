@@ -9,6 +9,7 @@ from django.conf.urls.defaults import patterns, include, url
 urlpatterns = patterns('',
 	url(r'^', include('main.urls')),
 	url(r'^command', include('commander.urls')),
+	url(r'^icons/(?P<digest>[0-9a-fA-F]{40}$)', 'commander.icons.digest'),
     # Examples:
     # url(r'^$', 'twirem.views.home', name='home'),
     # url(r'^twirem/', include('twirem.foo.urls')),

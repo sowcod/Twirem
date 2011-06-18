@@ -5,6 +5,7 @@ import os.path
 import urllib2
 import hashlib
 import re
+import mimetypes
 
 _path = None
 
@@ -42,6 +43,7 @@ def convert_iconurl(url):
 			'bigger': newurl('_bigger'),
 			'normal': newurl('_normal'),
 			'mini' : newurl('_mini'),
+			'mimetype' : mimetypes.guess_type(url)[0]
 			}
 
 def icon_pre_dir(digest):
@@ -57,8 +59,8 @@ def icon_paths(digest):
 			'bigger': os.path.join(digest_dir, 'bigger'),
 			'normal': os.path.join(digest_dir, 'normal'),
 			'mini': os.path.join(digest_dir, 'mini'),
+			'mimetype': os.path.join(digest_dir, 'mimetype'),
 			}
-			
 
 class ManagedIcon(object):
 	def __init__(self, url = None, digest = None):
@@ -72,12 +74,16 @@ class ManagedIcon(object):
 			self.digest = digest
 	
 	def load_all(self):
+		self.save_mimetype()
 		self.load('bigger')
 		self.load('mini')
 		try:
 			self.load('full')
 		except urllib2.HTTPError:
 			pass
+	
+	def save_mimetype(self):
+		self.save(self.urls['mimetype'], 'mimetype')
 
 	def load(self, name, digest_target = False):
 		"""
@@ -91,11 +97,11 @@ class ManagedIcon(object):
 	
 	def save(self, buf, name):
 		"""
-		raise : ManagedIcon.IconNotLoaded
+		raise : ManagedIcon.DigestIsNotSet
 		return : filepath
 		"""
-		if buf is None:
-			raise ManagedIcon.IconNotLoaded()
+		if self.digest is None:
+			raise ManagedIcon.DigestIsNotSet()
 
 		predir = icon_pre_dir(self.digest)
 		if not os.path.exists(predir):
@@ -112,9 +118,9 @@ class ManagedIcon(object):
 
 		return writepath
 	
-	class IconNotLoaded(Exception):
+	class DigestIsNotSet(Exception):
 		def __init__(self):
-			self.message = 'Call \'load()\' method.'
+			self.message = 'digest is not set.'
 
 		def __str__(self):
 			return self.message
