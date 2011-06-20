@@ -19,8 +19,15 @@ def checkdir(basepath):
 def checkicons(digest, icondir):
 	files = os.listdir(icondir)
 	if 'full' not in files: print('%s / missing: full' % digest)
-	if 'mini' not in files: print('%s / missing: mini' % digest)
+	#if 'mini' not in files: print('%s / missing: mini' % digest)
 	if 'normal' not in files: print('%s / missing: normal' % digest)
-	if 'bigger' not in files: print('%s / missing: bigger' % digest)
+	#if 'bigger' not in files: print('%s / missing: bigger' % digest)
+
+	for f in files:
+		if f == 'mimetype' : continue
+		checkfile(digest, os.path.join(icondir, f))
+
+def checkfile(digest, filepath):
+	if os.path.getsize(filepath) < 100: print('%s / size too small:' % filepath)
 
 checkdir('./icons')

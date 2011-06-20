@@ -32,9 +32,9 @@ def main():
 	db_crawler = DatabaseCrawler(10)
 
 	api_crawler.start()
-	db_crawler.start()
-	while True:
-		time.sleep(10)
+	db_crawler.run()
+	#while True:
+	#	time.sleep(10)
 
 def write_pid():
 	with open(PID_FILE, 'w') as f:

@@ -3,6 +3,7 @@
 import os
 import os.path
 import urllib2
+import urllib
 import hashlib
 import re
 
@@ -31,14 +32,17 @@ def convert_iconurl(url):
 	http://~~~/~~~_mini.xxx
 	に変換
 	"""
-	m = re.match(r'^(.*)_normal(\.\w*)?$', url.encode('utf-8'))
+	m = re.match(r'^(.*/)([^/]+)_normal(\.\w*)?$', url.encode('utf-8'))
+	
 	pre = m.group(1)
-	suf = m.group(2) if m.group(2) is not None else ''
+	mid = urllib.quote(m.group(2))
+	suf = m.group(3) if m.group(3) is not None else ''
 
-	newurl = lambda n: pre + n + suf
+	newurl = lambda n: pre + mid + n + suf
 
 	return {
-			'full': newurl('_reasonably_small'),
+			'full': newurl(''),
+			'full2': newurl('_reasonably_small'),
 			'bigger': newurl('_bigger'),
 			'normal': newurl('_normal'),
 			'mini' : newurl('_mini'),
@@ -68,20 +72,30 @@ class ManagedIcon(object):
 		if url is not None:
 			self.urls = convert_iconurl(url)
 			self.digest = None
-			self.load('normal', digest_target = True)
+			try:
+				self.load('normal', digest_target = True)
+			except urllib2.HTTPError, er:
+				if er.code ==  403: pass
 		if digest is not None:
 			self.digest = digest
 	
 	def load_all(self):
 		if self.digest is None: return
 		self.save_mimetype()
-		self.load('bigger')
-		self.load('mini')
+		#self.load('bigger')
+		#self.load('mini')
+
+		# 403の場合はエラーを投げない
 		try:
 			self.load('full')
 		except urllib2.HTTPError, er:
-			if er.code == 403: pass
-			else: raise
+			if er.code != 403: raise
+
+			try:
+				self.urls['full'] = self.urls['full2']
+				self.load('full')
+			except urllib2.HTTPError, er:
+				if er.code == 403: pass
 	
 	def save_mimetype(self):
 		self.save(self.mimetype, 'mimetype')
@@ -90,13 +104,9 @@ class ManagedIcon(object):
 		"""
 		raise : IOError, urllib2.HTTPError
 		"""
-		try:
-			response = urllib2.urlopen(self.urls[name])
-			buf = response.read()
-			mimetype =response.headers.type
-		except urllib2.HTTPError, er:
-			if er.code == 403: return
-			else: raise
+		response = urllib2.urlopen(self.urls[name])
+		buf = response.read()
+		mimetype =response.headers.type
 		if digest_target :
 			self.digest = hashlib.sha1(buf).hexdigest()
 			self.mimetype = mimetype
