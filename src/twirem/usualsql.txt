@@ -1,0 +1,1 @@
+select t1.user_id, t2.screen_name, t1.url, t1.digest from main_usericon t1 join main_userscreenname t2 on t1.user_id = t2.user_id where digest = '40a2ad8cc7cbbfbd77052432a21a25a2493ddedd';

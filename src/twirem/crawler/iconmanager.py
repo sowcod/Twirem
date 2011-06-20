@@ -5,7 +5,6 @@ import os.path
 import urllib2
 import hashlib
 import re
-import mimetypes
 
 _path = None
 
@@ -26,24 +25,23 @@ def convert_iconurl(url):
 	"""
 	http://~~~/~~~_normal.xxx
 	を、
-	http://~~~/~~~.xxx
+	http://~~~/~~~.reasonably_small.xxx
 	http://~~~/~~~_bigger.xxx
 	http://~~~/~~~_normal.xxx
 	http://~~~/~~~_mini.xxx
 	に変換
 	"""
-	m = re.match(r'^(.*)_normal(\.\w*)?$', url)
+	m = re.match(r'^(.*)_normal(\.\w*)?$', url.encode('utf-8'))
 	pre = m.group(1)
 	suf = m.group(2) if m.group(2) is not None else ''
 
 	newurl = lambda n: pre + n + suf
 
 	return {
-			'full': newurl(''),
+			'full': newurl('_reasonably_small'),
 			'bigger': newurl('_bigger'),
 			'normal': newurl('_normal'),
 			'mini' : newurl('_mini'),
-			'mimetype' : mimetypes.guess_type(url)[0]
 			}
 
 def icon_pre_dir(digest):
@@ -69,30 +67,39 @@ class ManagedIcon(object):
 		"""
 		if url is not None:
 			self.urls = convert_iconurl(url)
+			self.digest = None
 			self.load('normal', digest_target = True)
 		if digest is not None:
 			self.digest = digest
 	
 	def load_all(self):
+		if self.digest is None: return
 		self.save_mimetype()
 		self.load('bigger')
 		self.load('mini')
 		try:
 			self.load('full')
-		except urllib2.HTTPError:
-			pass
+		except urllib2.HTTPError, er:
+			if er.code == 403: pass
+			else: raise
 	
 	def save_mimetype(self):
-		self.save(self.urls['mimetype'], 'mimetype')
+		self.save(self.mimetype, 'mimetype')
 
 	def load(self, name, digest_target = False):
 		"""
 		raise : IOError, urllib2.HTTPError
 		"""
-		response = urllib2.urlopen(self.urls[name])
-		buf = response.read()
+		try:
+			response = urllib2.urlopen(self.urls[name])
+			buf = response.read()
+			mimetype =response.headers.type
+		except urllib2.HTTPError, er:
+			if er.code == 403: return
+			else: raise
 		if digest_target :
 			self.digest = hashlib.sha1(buf).hexdigest()
+			self.mimetype = mimetype
 		self.save(buf, name)
 	
 	def save(self, buf, name):

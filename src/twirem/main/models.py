@@ -22,9 +22,9 @@ class Authorization(models.Model):
 	token_secret = models.CharField(max_length = 100, blank = True)
 	def __init__(self, *args, **kwargs):
 		super(Authorization, self).__init__(*args, **kwargs)
-		self.user_profile = UserProfile.objects.get_or_create(
-				user_id = self.user_id,
-				authorization = self)[0]
+		self.user_profile = UserProfile.objects.get_or_create(user_id = self.user_id)[0]
+		self.user_profile.authorization = self
+		self.user_profile.save()
 
 class UserProfile(models.Model):
 	"""
@@ -122,11 +122,12 @@ class UserIcon(SpanModel):
 	"""
 	small(), normal(), bigger(), original()関数で、
 	画像のファイルパスを取得できる。
+	403で画像が取得できなかった時などは、digestには何もセットしない。
 	"""
 	user = models.ForeignKey('UserProfile',
 			related_name = 'icons', db_index = True)
 	url = models.CharField(max_length = 500)
-	digest = models.CharField(max_length = 40)
+	digest = models.CharField(max_length = 40, null = True)
 	def small(self):
 		pass
 	def normal(self):

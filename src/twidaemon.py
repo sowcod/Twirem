@@ -28,8 +28,8 @@ def main():
 
 	#signal.signal(signal.SIGTERM, kill_all_children)
 
-	api_crawler = ApiCrawler(60)
-	db_crawler = DatabaseCrawler(30)
+	api_crawler = ApiCrawler(10)
+	db_crawler = DatabaseCrawler(10)
 
 	api_crawler.start()
 	db_crawler.start()

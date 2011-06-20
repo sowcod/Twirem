@@ -16,24 +16,33 @@ class DatabaseCrawler(threading.Thread):
 	def run(self):
 		logging.debug('start crawling database')
 		while True:
-			self.crawl_bios(limit = 10)
+			start_time = time.time()
+			self.crawl_bios(limit = 50)
+			timediff = time.time() - start_time
+			if timediff > 60 : logging.debug('crawl_bios() time %d' % timediff)
 			time.sleep(self.sleep)
 	
 	def crawl_bios(self, limit = 50):
-		bios = UserBio.objects.all().order_by('update_date')[:limit]
+		all_bios = UserBio.objects.all()
+		bios = all_bios.order_by('update_date')[:limit]
 		#ids = [bio.user_id for bio in bios]
 		#user_dict = UserProfile.objects.select_related(
 		#		'screen_names', 'icons').filter(
 		#		q_inner(key='screen_names'), q_inner(key='icons')
 		#		).in_bulk(ids)
+		logging.debug('DatabaseCrawler time : %d / remaining %d users' % (time.time(), all_bios.count()))
 
 		for bio in bios:
 			#user = user_dict[bio.user_id] if bio.user_id in user_dict else None
-			logging.debug('crawl bio %s' % bio.user_id)
-			user = UserProfile.objects.get_or_create(user_id = bio.user_id)[0]
-			self.update_screen_name(bio, user)
-			self.update_icon(bio, user)
-			bio.delete()
+			#logging.debug('crawl bio %s' % bio.user_id)
+
+			try:
+				user = UserProfile.objects.get_or_create(user_id = bio.user_id)[0]
+				self.update_screen_name(bio, user)
+				self.update_icon(bio, user)
+				bio.delete()
+			except Exception, ex:
+				logging.debug('Exception \'crawl_bio()\' user : %d / %s / %s' % (bio.user_id, ex.__class__, ex))
 	
 	def update_screen_name(self, bio, user):
 		"""
@@ -63,7 +72,7 @@ class DatabaseCrawler(threading.Thread):
 		icon = ManagedIcon(bio.icon_url)
 
 		if old_icon is None \
-				or old_icon.url != icon.urls['normal'] \
+				or old_icon.url.encode('utf-8') != icon.urls['normal'] \
 				or old_icon.digest != icon.digest:
 			icon.load_all()
 			new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'])

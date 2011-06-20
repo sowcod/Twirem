@@ -3,6 +3,7 @@
 *.db
 *.pid
 *.log
+.DS_Store
 icons/*
 !icons/z_empty
 /startdev.sh

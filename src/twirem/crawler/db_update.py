@@ -94,16 +94,17 @@ def update_bios(bios, target_date = None):
 	u"""
 	APIから得られたユーザ情報のリストから、
 	UserBioテーブルを更新する。
+	UserBioが既にあった場合はupdate_dateは更新しない。
 	"""
 	if target_date is None: target_date = time.time() - 60*60*24
 
 	for bio_data in bios:
 		user = UserProfile.objects.get_or_create(user_id = bio_data['id'])[0]
-		bio = UserBio.objects.get_or_create(user = user)[0]
+		bio, created = UserBio.objects.get_or_create(user = user)
 		if bio.update_date <= target_date:
 			bio.screen_name = bio_data['screen_name']
 			bio.icon_url = bio_data['profile_image_url']
-			bio.update_date = time.time()
+			if not created: bio.update_date = time.time()
 			bio.save()
 
 def update_screen_names(users):

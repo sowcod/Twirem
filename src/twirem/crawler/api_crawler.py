@@ -13,6 +13,7 @@ class ApiCrawler(threading.Thread):
 	def __init__(self, sleep = 5):
 		super(ApiCrawler, self).__init__(target = self)
 		self.sleep = sleep
+		self.expire_time = 60 * 60 * 1
 		self.setDaemon(True)
 
 	def run(self):
@@ -27,9 +28,9 @@ class ApiCrawler(threading.Thread):
 		"""
 		users = UserProfile.objects.filter(
 				authorization__isnull = False,
-				update_date__lt = time.time() - 60
+				update_date__lt = time.time() - self.expire_time
 				).order_by('update_date')[:limit]
-		logging.debug('ApiCrawler time : %d' % (time.time() - 60))
+		logging.debug('ApiCrawler time : %d' % (time.time() - self.expire_time))
 
 		for user in users:
 			self.crawl_user(user)
@@ -90,10 +91,10 @@ class ApiCrawler(threading.Thread):
 		if activity.update_date != 0 : return
 
 		target_users = db_update.users_related(user.user_id)
-		users_list = CrusterList(target_users, 100)
+		users_list = CrusterList(target_users, 99)
 		for users in users_list:
 			bios = requester.lookup(IteratorProxy(users, lambda o: str(o.user_id)))
-			db_update.update_bios(bios, time.time() - 60)
+			db_update.update_bios(bios, time.time() - self.expire_time)
 
 		activity.update_date = time.time()
 		activity.save()
