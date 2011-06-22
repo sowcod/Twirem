@@ -26,7 +26,8 @@ def convert_iconurl(url):
 	"""
 	http://~~~/~~~_normal.xxx
 	を、
-	http://~~~/~~~.reasonably_small.xxx
+	http://~~~/~~~.xxx
+	http://~~~/~~~_reasonably_small.xxx
 	http://~~~/~~~_bigger.xxx
 	http://~~~/~~~_normal.xxx
 	http://~~~/~~~_mini.xxx
@@ -41,8 +42,8 @@ def convert_iconurl(url):
 	newurl = lambda n: pre + mid + n + suf
 
 	return {
-			'full': newurl(''),
-			'full2': newurl('_reasonably_small'),
+			'full': newurl('_reasonably_small'),
+			'full2': newurl(''),
 			'bigger': newurl('_bigger'),
 			'normal': newurl('_normal'),
 			'mini' : newurl('_mini'),
@@ -73,9 +74,9 @@ class ManagedIcon(object):
 			self.urls = convert_iconurl(url)
 			self.digest = None
 			try:
-				self.load('normal', digest_target = True)
-			except urllib2.HTTPError, er:
-				if er.code ==  403: pass
+				self.load('normal', [self.urls['normal']], digest_target = True)
+			except ManagedIcon.CannotLoad:
+				pass
 		if digest is not None:
 			self.digest = digest
 	
@@ -84,29 +85,38 @@ class ManagedIcon(object):
 		self.save_mimetype()
 		#self.load('bigger')
 		#self.load('mini')
-
-		# 403の場合はエラーを投げない
-		try:
-			self.load('full')
-		except urllib2.HTTPError, er:
-			if er.code != 403: raise
-
-			try:
-				self.urls['full'] = self.urls['full2']
-				self.load('full')
-			except urllib2.HTTPError, er:
-				if er.code == 403: pass
+		self.load('full', [
+			self.urls['full'],
+			self.urls['full2'],
+			self.urls['normal']
+			])
 	
 	def save_mimetype(self):
 		self.save(self.mimetype, 'mimetype')
 
-	def load(self, name, digest_target = False):
+	def load(self, name, urls, digest_target = False):
 		"""
-		raise : IOError, urllib2.HTTPError
+		raise : IOError, urllib2.HTTPError, ManagedIcon.ForbiddenLoading
 		"""
-		response = urllib2.urlopen(self.urls[name])
-		buf = response.read()
-		mimetype =response.headers.type
+		response = None
+		buf = None
+		mimetype = None
+
+		for url in urls:
+			try:
+				response = urllib2.urlopen(url)
+				buf = response.read()
+				if len(buf) < 50: continue
+
+				mimetype = response.headers.type
+				break
+			except urllib2.HTTPError, er:
+				if er.code == 403: continue
+				raise
+
+		if mimetype == None:
+			raise ManagedIcon.CannotLoad()
+
 		if digest_target :
 			self.digest = hashlib.sha1(buf).hexdigest()
 			self.mimetype = mimetype
@@ -138,6 +148,13 @@ class ManagedIcon(object):
 	class DigestIsNotSet(Exception):
 		def __init__(self):
 			self.message = 'digest is not set.'
+
+		def __str__(self):
+			return self.message
+
+	class CannotLoad(Exception):
+		def __init__(self):
+			self.message = 'image cannot load.'
 
 		def __str__(self):
 			return self.message

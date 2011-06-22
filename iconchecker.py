@@ -28,6 +28,6 @@ def checkicons(digest, icondir):
 		checkfile(digest, os.path.join(icondir, f))
 
 def checkfile(digest, filepath):
-	if os.path.getsize(filepath) < 100: print('%s / size too small:' % filepath)
+	if os.path.getsize(filepath) < 50: print('%s / size too small:' % filepath)
 
 checkdir('./icons')
