@@ -2,6 +2,12 @@
 
 from django.db import models
 
+DIFF_TYPE = (
+		('E', 'Equal'),
+		('C', 'Change'),
+		('N', 'None'),
+		)
+
 class Report(models.Model):
 	"""
 	followers
@@ -30,11 +36,13 @@ class DiffFriend(models.Model):
 	remove = models.BooleanField()
 
 class DiffScreenName(models.Model):
-	report = models.ForeignKey('Report', related_name = 'screen_names')
-	old = models.ForeignKey('main.UserScreenName')
-	new = models.ForeignKey('main.UserScreenName')
+	report = models.ForeignKey('Report', related_name = 'screen_name')
+	old = models.ForeignKey('main.UserScreenName', related_name = 'diff_old', null = True)
+	new = models.ForeignKey('main.UserScreenName', related_name = 'diff_new', null = True)
+	diff_type = models.CharField(max_length = 1, choices = DIFF_TYPE)
 
 class DiffIcon(models.Model):
-	report = models.ForeignKey('Report', related_name = 'icons')
-	old = models.ForeignKey('main.UserIcon')
-	new = models.ForeignKey('main.UserIcon')
+	report = models.ForeignKey('Report', related_name = 'icon')
+	old = models.ForeignKey('main.UserIcon', related_name = 'diff_old', null = True)
+	new = models.ForeignKey('main.UserIcon', related_name = 'diff_new', null = True)
+	diff_type = models.CharField(max_length = 1, choices = DIFF_TYPE)
