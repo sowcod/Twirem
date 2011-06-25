@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 import twoauth
+from models import ApiKeys
 from . import models
 
 class NotLogonError(Exception):
@@ -9,23 +10,31 @@ class NotLogonError(Exception):
 	"""
 	pass
 
-_ckey = r'Uc3NTwnHkJyO4RagQSbjWg'
-_csecret = r'qFeMN20eKHk6JDqGjgNffuWXvRDhmsjKBJy21Z9lksY'
+#ckey = r'Uc3NTwnHkJyO4RagQSbjWg'
+#csecret = r'qFeMN20eKHk6JDqGjgNffuWXvRDhmsjKBJy21Z9lksY'
 
 def create_oauth(atoken = '', asecret = ''):
 	u"""
 	oauthオブジェクトを作る
 	"""
-	return twoauth.oauth(_ckey, _csecret, atoken, asecret)
+	keys = ApiKeys.objects.get()
+	ckey = keys.ckey.encode('utf-8')
+	csecret = keys.csecret.encode('utf-8')
+	print(ckey, csecret)
+	return twoauth.oauth(ckey, csecret, atoken, asecret)
 
 def create_api(atoken = '', asecret = '', auth = None):
 	u"""
 	APIオブジェクトを作る
 	"""
+	keys = ApiKeys.objects.get()
+	ckey = keys.ckey.encode('utf-8')
+	csecret = keys.csecret.encode('utf-8')
+	print(ckey, csecret)
 	if isinstance(auth, models.Authorization):
-		return twoauth.api(_ckey, _csecret, auth.token, auth.token_secret)
+		return twoauth.api(ckey, csecret, auth.token, auth.token_secret)
 	else:
-		return twoauth.api(_ckey, _csecret, atoken, asecret)
+		return twoauth.api(ckey, csecret, atoken, asecret)
 
 def save_auth(req_token, oauth_verifier):
 	from models import Authorization

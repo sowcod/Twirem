@@ -15,6 +15,10 @@ def q_inner(tick = None, key = ''):
 	kargs[key + 'end_date__gt'] = tick
 	return Q(**kargs)
 
+class ApiKeys(models.Model):
+	ckey = models.CharField(max_length = 100)
+	csecret = models.CharField(max_length = 100)
+
 class Authorization(models.Model):
 	user_id = models.IntegerField(primary_key = True)
 	screen_name = models.CharField(max_length = 20)

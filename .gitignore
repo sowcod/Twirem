@@ -4,6 +4,7 @@
 *.pid
 *.log
 .DS_Store
+apikeys
 icons/*
 !icons/z_empty
 /startdev.sh
