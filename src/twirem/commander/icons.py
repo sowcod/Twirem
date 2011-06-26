@@ -1,9 +1,11 @@
 #-*- coding: utf-8 -*-
 
+import os.path
 from twirem.crawler import iconmanager
 from django.http import HttpResponse
 
-iconmanager.set_base_path('../../icons')
+iconmanager.set_base_path(os.path.abspath(os.path.join(
+	os.path.dirname(__file__),'../../../icons')))
 
 def digest(request, digest):
 	"""

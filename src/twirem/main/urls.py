@@ -8,10 +8,10 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
 	#url(r'^$', 'django.views.generic.simple.direct_to_template', {'template':'main/top.html'}),
-	url(r'^$', 'main.views.toppage'),
-	url(r'^access_token$', 'main.views.access_token'),
-	url(r'^auth$', 'main.views.auth'),
-	url(r'^logout$', 'main.views.logout'),
+	url(r'^$', 'twirem.main.views.toppage'),
+	url(r'^access_token$', 'twirem.main.views.access_token'),
+	url(r'^auth$', 'twirem.main.views.auth'),
+	url(r'^logout$', 'twirem.main.views.logout'),
     # Examples:
     # url(r'^$', 'twirem.views.home', name='home'),
     # url(r'^twirem/', include('twirem.foo.urls')),

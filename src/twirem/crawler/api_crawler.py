@@ -13,7 +13,7 @@ class ApiCrawler(threading.Thread):
 	def __init__(self, sleep = 5):
 		super(ApiCrawler, self).__init__(target = self)
 		self.sleep = sleep
-		self.expire_time = 60 * 60 * 1
+		self.expire_time = 60 * 60 * 3 # 3 hour
 		self.setDaemon(True)
 
 	def run(self):

@@ -6,5 +6,6 @@
 .DS_Store
 apikeys
 icons/*
+.python-eggs/
 !icons/z_empty
 /startdev.sh
