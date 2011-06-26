@@ -5,7 +5,7 @@ from django.db import models
 from datetime import datetime
 from django.db.models import Q
 
-_maxtime = time.mktime(datetime.max.timetuple())
+_maxtime = time.mktime(datetime(2038,1,1).timetuple())
 
 def q_inner(tick = None, key = ''):
 	if tick is None: tick = time.time()
