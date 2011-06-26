@@ -42,8 +42,8 @@ def convert_iconurl(url):
 	newurl = lambda n: pre + mid + n + suf
 
 	return {
-			'full': newurl('_reasonably_small'),
-			'full2': newurl(''),
+			'full': newurl(''),
+			'full2': newurl('_reasonably_small'),
 			'bigger': newurl('_bigger'),
 			'normal': newurl('_normal'),
 			'mini' : newurl('_mini'),
