@@ -9,33 +9,35 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'twirem.settings'
 from twirem.main.models import UserFriend, UserScreenName, UserIcon
 
 def processUserFriend():
-	friends = UserFriend.objects.all().values('user_id', 'friend_id').distinct()
+	friends = UserFriend.objects.all().values('user', 'friend').distinct()
 	for friend in friends:
-		setUserFriendStart(friends['user_id'], friends['friend_id'])
+		setUserFriendStart(friend['user'], friend['friend'])
 
 def setUserFriendStart(user_id, friend_id):
-	friend = UserFriend.objects.filter(user_id = user_id, friend_id = friend_id).order_by('start_date')[0]
-	print(friend.user_id, friend._friend_id, friend.start_date)
-
+	friend = UserFriend.objects.filter(user = user_id, friend = friend_id).order_by('start_date')[0]
+	friend.start_date = 0
+	friend.save()
 
 def processUserScreenName():
-	users = UserScreenName.objects.all().values('user_id').distinct()
+	users = UserScreenName.objects.all().values('user').distinct()
 	for user in users:
-		setUserScreenNameStart(user['user_id'])
+		setUserScreenNameStart(user['user'])
 
 def setUserScreenNameStart(user_id):
-	name = UserScreenName.objects.filter(user_id = user_id).order_by('start_date')[0]
-	print(name.screen_name, name.start_date)
+	name = UserScreenName.objects.filter(user = user_id).order_by('start_date')[0]
+	name.start_date = 0
+	name.save()
 
 
 def processUserIcon():
-	users = UserIcon.objects.all().values('user_id').distinct()
+	users = UserIcon.objects.all().values('user').distinct()
 	for user in users:
-		setUserIconStart(user['user_id'])
+		setUserIconStart(user['user'])
 
 def setUserIconStart(user_id):
-	icon = UserIcon.objects.filter(user_id = user_id).order_by('start_date')[0]
-	print(icon.digest, icon.start_date)
+	icon = UserIcon.objects.filter(user = user_id).order_by('start_date')[0]
+	icon.start_date = 0
+	icon.save()
 
 processUserFriend()
 processUserScreenName()
