@@ -50,7 +50,8 @@ def update_followers(user_id, followers):
 		o.save()
 	def followed(uid):
 		user.followers.create(
-				user = UserProfile.objects.get_or_create(user_id = uid)[0])
+				user = UserProfile.objects.get_or_create(user_id = uid)[0],
+				start_date = 0)
 	def refollowed(o, uid):
 		if not o.unfollow : return
 		# refollow
@@ -78,7 +79,8 @@ def update_friends(user_id, friends):
 		o.save()
 	def followed(uid):
 		user.friends.create(
-				friend = UserProfile.objects.get_or_create(user_id = uid)[0])
+				friend = UserProfile.objects.get_or_create(user_id = uid)[0],
+				start_date = 0)
 	def refollowed(o, uid):
 		if not o.unfollow : return
 		#refollow

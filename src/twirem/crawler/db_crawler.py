@@ -54,10 +54,14 @@ class DatabaseCrawler(threading.Thread):
 			old_sn = None
 
 		if old_sn is None or old_sn.screen_name != bio.screen_name:
-			new_sn = user.screen_names.create(screen_name = bio.screen_name)
 			if old_sn is not None:
+				new_sn = user.screen_names.create(screen_name = bio.screen_name)
 				old_sn.end_date = new_sn.start_date
 				old_sn.save()
+			else:
+				new_sn = user.screen_names.create(screen_name = bio.screen_name,
+						start_date = 0)
+
 
 	def update_icon(self, bio, user):
 		"""
@@ -75,7 +79,11 @@ class DatabaseCrawler(threading.Thread):
 				or old_icon.url.encode('utf-8') != icon.urls['normal'] \
 				or old_icon.digest != icon.digest:
 			icon.load_all()
-			new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'])
 			if old_icon is not None:
+				new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'])
 				old_icon.end_date = new_icon.start_date
 				old_icon.save()
+			else:
+				new_icon = user.icons.create(digest = icon.digest, url = icon.urls['normal'],
+						start_date = 0)
+
