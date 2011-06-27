@@ -106,7 +106,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'twirem.urls'
 
 TEMPLATE_DIRS = (
-	os.path.abspath(os.path.join('../..', 'templates')),
+    os.path.abspath(os.path.join(
+        os.path.dirname(__file__),'../..', 'templates')),
 	#'/Users/sohei/Documents/Projects/Twirem/templates',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -120,9 +121,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'twirem.main',
-	'twirem.crawler',
-	'twirem.reporter',
+    'twirem.main',
+    'twirem.crawler',
+    'twirem.reporter',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

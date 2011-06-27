@@ -4,6 +4,7 @@
 http://d.hatena.ne.jp/yoshifumi1975/20090516/p1
 """
 import os
+import os.path
 import sys
 import time
 #import signal
@@ -19,22 +20,23 @@ PID_FILE='daemon.pid'
 logging.config.fileConfig('log.conf')
 logger = logging.getLogger('daemon')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'twirem.settings'
-iconmanager.set_base_path('../icons')
+iconmanager.set_base_path(os.path.abspath(os.path.join(
+	os.path.dirname(__file__),'../icons')))
 
 def main():
-	#daemonize()
+	daemonize()
 
-	#write_pid()
+	write_pid()
 
 	#signal.signal(signal.SIGTERM, kill_all_children)
 
-	api_crawler = ApiCrawler(10)
-	db_crawler = DatabaseCrawler(10)
+	api_crawler = ApiCrawler(60)
+	db_crawler = DatabaseCrawler(60)
 
 	api_crawler.start()
-	db_crawler.run()
-	#while True:
-	#	time.sleep(10)
+	db_crawler.start()
+	while True:
+		time.sleep(10)
 
 def write_pid():
 	with open(PID_FILE, 'w') as f:

@@ -7,9 +7,9 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-	url(r'^', include('main.urls')),
-	url(r'^command', include('commander.urls')),
-	url(r'^icons/(?P<digest>[0-9a-fA-F]{40}$)', 'commander.icons.digest'),
+	url(r'^', include('twirem.main.urls')),
+	url(r'^command', include('twirem.commander.urls')),
+	url(r'^icons/(?P<digest>[0-9a-fA-F]{40}$)', 'twirem.commander.icons.digest'),
     # Examples:
     # url(r'^$', 'twirem.views.home', name='home'),
     # url(r'^twirem/', include('twirem.foo.urls')),
