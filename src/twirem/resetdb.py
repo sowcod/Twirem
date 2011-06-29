@@ -14,12 +14,28 @@ import os.path
 sys.path.append(os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'twirem.settings'
 
-from twirem.main.models import ApiKeys
+def clear_tables():
+	from django.db import connection
+	cursor = connection.cursor()
+	cursor.execute('SHOW TABLES')
+	for row in cursor:
+		cursor.execute('DROP TABLE %s;' % row[0])
 
-apikeys = ApiKeys()
+def syncdb():
+	os.system('python manage.py syncdb')
 
-with open('apikeys', 'r') as f:
-	apikeys.ckey = f.readline().rstrip()
-	apikeys.csecret = f.readline().rstrip()
+def set_apikey():
+	from twirem.main.models import ApiKeys
 
-apikeys.save()
+	apikeys = ApiKeys()
+
+	with open('apikeys', 'r') as f:
+		apikeys.ckey = f.readline().rstrip()
+		apikeys.csecret = f.readline().rstrip()
+
+	apikeys.save()
+
+clear_tables()
+syncdb()
+set_apikey()
+
